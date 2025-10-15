@@ -1,0 +1,1620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz for Exam 16.09.2025</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .quiz-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .option-btn {
+            transition: all 0.2s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+            line-height: 1.5;
+        }
+        .option-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .correct {
+            background-color: #d1fae5 !important;
+            border-color: #10b981 !important;
+            color: #065f46;
+        }
+        .incorrect {
+            background-color: #fee2e2 !important;
+            border-color: #ef4444 !important;
+            color: #991b1b;
+        }
+        .selected {
+            background-color: #e0f2fe;
+            border-color: #38bdf8;
+        }
+        .question-nav-btn {
+            transition: all 0.2s ease-in-out;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+        .question-nav-btn.active {
+            background-color: #4f46e5;
+            color: white;
+            border-color: #4f46e5;
+        }
+        .question-nav-btn.answered-correct {
+            background-color: #bfdbfe; /* Tailwind blue-200 */
+            border-color: #60a5fa; /* Tailwind blue-400 */
+            color: #1e40af; /* Tailwind blue-800 */
+        }
+        .question-nav-btn.answered-incorrect {
+            background-color: #fecaca; /* Tailwind red-200 */
+            border-color: #f87171; /* Tailwind red-400 */
+            color: #991b1b; /* Tailwind red-900 */
+        }
+        .question-nav-btn:hover:not(.active) {
+            background-color: #f3f4f6;
+        }
+        /* Styles for Edit Mode */
+        .edit-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            margin-top: 4px;
+        }
+        .edit-label {
+            font-weight: 500;
+            color: #374151;
+            margin-top: 12px;
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen py-8">
+
+    <div id="quiz-container" class="quiz-container w-full">
+        
+        <div class="text-center mb-8 relative">
+            <h1 class="text-3xl font-bold text-gray-800">Quiz for Exam 16.09.2025</h1>
+            <p id="quiz-subtitle" class="text-gray-500 mt-2">Subject: Medical Semiology (  60 questions)</p>
+            <p class="text-gray-500">Lecturer: គ្រូតា & SOTHEARITH & NHEP NETH</p>
+            <div class="absolute top-0 left-0 flex gap-2">
+                <button id="practice-sheet-btn" class="bg-blue-100 text-blue-700 font-semibold py-2 px-4 rounded-lg hover:bg-blue-200 text-sm">Practice Sheet</button>
+                <buttoគ្រូតា & SOTHEARITH & NHEP NETHn id="show-all-btn" class="bg-green-100 text-green-700 font-semibold py-2 px-4 rounded-lg hover:bg-green-200 text-sm">Show Answers</button>
+            </div>
+            <button id="edit-quiz-btn" class="absolute top-0 right-0 bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 text-sm">Edit Quiz</button>
+        </div>
+
+        <div class="text-center mb-6">
+            <div class="inline-flex rounded-md shadow-sm" role="group">
+                <button id="part1-btn" type="button" class="py-2 px-6 text-sm font-medium text-white bg-indigo-600 rounded-l-lg border border-gray-200 hover:bg-indigo-700 focus:z-10 focus:ring-2 focus:ring-indigo-500">
+                    Part 1
+                </button>
+                <button id="part2-btn" type="button" class="py-2 px-6 text-sm font-medium text-gray-900 bg-white border-t border-b border-gray-200 hover:bg-gray-100 focus:z-10 focus:ring-2 focus:ring-indigo-500">
+                    Part 2
+                </button>
+                 <button id="part3-btn" type="button" class="py-2 px-6 text-sm font-medium text-gray-900 bg-white rounded-r-md border border-gray-200 hover:bg-gray-100 focus:z-10 focus:ring-2 focus:ring-indigo-500">
+                    Part 3
+                </button>
+            </div>
+        </div>
+
+
+        <div id="quiz-view">
+            <div class="flex justify-between items-center mb-4">
+                 <div id="main-score-text" class="text-lg font-bold text-indigo-600"></div>
+                 <button id="redo-part-btn" class="bg-orange-100 text-orange-700 font-semibold py-2 px-4 rounded-lg hover:bg-orange-200 text-sm">Redo Part</button>
+            </div>
+            <div id="question-navigation" class="flex flex-wrap justify-center gap-2 mb-6">
+                <!-- Question number buttons will be dynamically inserted here -->
+            </div>
+
+            <div id="question-area" class="mb-8">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 id="question-number" class="text-xl font-semibold text-gray-700"></h2>
+                   
+                </div>
+                <div id="question-text" class="text-lg text-gray-800 leading-relaxed"></div>
+            </div>
+
+            <div id="answer-area" class="grid grid-cols-1 md-grid-cols-2 gap-4">
+                <!-- Options will be dynamically inserted here -->
+            </div>
+
+            <div id="feedback-area" class="mt-6 text-center text-lg font-medium"></div>
+
+            <div class="mt-6 text-center">
+                <button id="redo-btn" class="hidden bg-yellow-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-yellow-600 transition-colors duration-300 shadow-lg">
+                    Redo Question
+                </button>
+            </div>
+
+            <div class="mt-4 flex justify-between items-center">
+                <button id="prev-btn" class="bg-gray-500 text-white font-bold py-3 px-8 rounded-lg hover:bg-gray-600 transition-colors duration-300 shadow-lg hidden">
+                    <span class="font-semibold">&larr; Previous</span>
+                </button>
+                <button id="next-btn" class="bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 transition-colors duration-300 shadow-lg hidden ml-auto">
+                    <span class="font-semibold">Next Question</span>
+                </button>
+            </div>
+
+            <div id="results-area" class="hidden text-center">
+                <div class="mb-4">
+                    <h2 class="text-4xl font-extrabold text-gray-800">Quiz Complete!</h2>
+                </div>
+                <p id="results-score" class="text-2xl text-gray-600 mb-6"></p>
+                <div id="summary" class="text-left mt-8 bg-gray-50 p-6 rounded-lg">
+                    <div class="text-center">
+                        <h3 class="text-xl font-bold text-gray-700">Review Your Answers:</h3>
+                    </div>
+                </div>
+                <button id="restart-btn" class="mt-8 bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 transition-colors duration-300 shadow-lg">
+                    <span class="font-semibold">Play Again</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="practice-sheet-view" class="hidden">
+            <!-- Content generated by JS -->
+        </div>
+
+        <div id="all-questions-view" class="hidden">
+            <!-- Content for showing all answers -->
+        </div>
+
+        <div id="edit-view" class="hidden">
+            <h2 class="text-2xl font-bold text-center mb-6">Edit Quiz Questions</h2>
+            <div id="edit-question-navigation" class="flex flex-wrap justify-center gap-2 mb-6">
+                <!-- Edit mode question number buttons will be dynamically inserted here -->
+            </div>
+            <div id="edit-questions-container"></div>
+            <div class="flex justify-between items-start mt-8">
+                <button id="add-question-btn" class="bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700">Add Question</button>
+                <div>
+                    <button id="cancel-edit-btn" class="bg-gray-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-600 mr-4">Cancel</button>
+                    <button id="apply-preview-btn" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700">Apply to Preview</button>
+                    <button id="generate-save-code-btn" class="bg-purple-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-purple-700 ml-4">Generate Save Code</button>
+                </div>
+            </div>
+            <div id="export-area" class="hidden mt-6 p-4 border-2 border-dashed border-purple-400 rounded-lg bg-purple-50">
+                <h3 class="text-lg font-semibold text-purple-800">How to Save Your Changes Permanently</h3>
+                <ol class="list-decimal list-inside text-gray-700 space-y-2 mt-2">
+                    <li>All the code for your updated quiz is in the text box below.</li>
+                    <li>Click anywhere in the box to automatically copy all the code.</li>
+                    <li>Paste the copied code in a new message and send it to me.</li>
+                    <li>I will then update the file for you with your permanent changes.</li>
+                </ol>
+                <textarea id="export-output" readonly class="w-full h-64 p-2 border rounded-md bg-gray-100 font-mono text-sm focus:ring-2 focus:ring-indigo-500 mt-4 cursor-pointer"></textarea>
+                <p id="copy-feedback" class="text-purple-700 font-medium text-sm mt-2 h-4"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const quizDataPart1 = [{
+            "number": 158,
+            "type": "comparison-table",
+            "question": { "en": "Pulmonary condensation is divided in 2 retraction and un retraction. What is the difference between 2 types mentioned above ?" },
+            "header_columns": ["Retraction", "Un retraction"],
+            "answer": {
+                "rows": [
+                    [
+                        "Hemithorax involved is decreased of it mobility",
+                        "Hemithorax involved is normal in it mobility"
+                    ],
+                    [
+                        "BS abolished in hemithorax involved.",
+                        "BS decreased in hemithorax involved."
+                    ],
+                    [
+                        "VV increased in hemithorax involved.",
+                        "VV increased in hemithorax involved."
+                    ]
+                ]
+            }
+        },
+        {
+            "number": 159,
+            "type": "comparison-table",
+            "question": { "en": "What diseases are caused by the presence of the following in the pleural cavity?" },
+            "header_columns": ["Presence of...", "Disease Name"],
+            "row_headers": true,
+            "answer": {
+                "rows": [
+                    ["Air in pleural cavity", "Pneumothorax"],
+                    ["Liquid in pleural cavity", "Pleurisy"],
+                    ["Blood in pleural cavity", "Hemothorax"],
+                    ["Lymph in pleural cavity", "Cholesterol pleurisy"],
+                    ["Air and liquid in pleural cavity", "Hydropneumothorax"]
+                ]
+            }
+        }, {
+            "number": 160,
+            "type": "comparison-table",
+            "question": {
+                "en": "Describe the functional signs and the physical signs (inspection, palpation, percussion, auscultation) of fluid pleural effusion ( pleurisy).\n"
+            },
+            "header_columns": ["med-term", "definitions"],
+            "row_headers": true,
+            "answer": {
+                "rows": [
+                    ["Inspection", "immobility of the hemithorax"],
+                    ["Palpation", "abolition of vocal vibrations (true sign)   "],
+                    ["Percussion", "dullness"],
+                    ["Auscultation", "abolition of  breath sounds."]
+                ]
+            }
+        }, {
+            "number": 161,
+            "type": "comparison-table",
+            "question": {
+                "en": " differentiation between pneumothorax and abundance pleurisy :"
+            },
+            "header_columns": ["Pneumothorax", "Abundance pleurisy"],
+            "answer": {
+                "rows": [
+                    [
+                        "immobile hemithorax",
+                        "immobility of the hemithorax"
+                    ],
+                    [
+                        "abolition of vocal vibrations",
+                        "abolition of vocal vibrations (true sign)"
+                    ],
+                    [
+                        "Tympany",
+                        "dullness"
+                    ],
+                    [
+                        "abolition of normal breath sounds(Silence)",
+                        "abolition of normal breath sounds."
+                    ]
+                ]
+            }
+        }];
+        const quizDataPart2 = [{
+            "number": 129,
+            "type": "image-fill-in-the-blank",
+            "question": { "en": "What is this procedure:" },
+            "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTOE-x9QflHr3OtgMgolpmVxSmDLjHXv4igKma-lOqdQNL1Lhjb",
+            "answer": "Thoracentesis"
+        }, {
+            "number": 132,
+            "type": "image-fill-in-the-blank",
+            "question": { "en": "what is this procesure" },
+            "image_url": "https://cdn.amegroups.cn/journals/pbpc/files/journals/2/articles/1886/public/1886-PB19-R1.png/w300",
+            "answer": "Transbronchial biopsy"
+        }];
+        const quizDataPart3 = [];
+        let quizData;
+
+        let currentPart = 1;
+        let quizState = {};
+
+        // Sound Synthesis
+        const correctSynth = new Tone.Synth().toDestination();
+        const incorrectSynth = new Tone.Synth().toDestination();
+        let audioStarted = false;
+
+        // DOM Elements
+        const part1Btn = document.getElementById('part1-btn');
+        const part2Btn = document.getElementById('part2-btn');
+        const part3Btn = document.getElementById('part3-btn');
+        const quizView = document.getElementById('quiz-view');
+        const editView = document.getElementById('edit-view');
+        const practiceSheetBtn = document.getElementById('practice-sheet-btn');
+        const practiceSheetView = document.getElementById('practice-sheet-view');
+        const showAllBtn = document.getElementById('show-all-btn');
+        const allQuestionsView = document.getElementById('all-questions-view');
+        const editQuizBtn = document.getElementById('edit-quiz-btn');
+        const applyPreviewBtn = document.getElementById('apply-preview-btn');
+        const generateSaveCodeBtn = document.getElementById('generate-save-code-btn');
+        const cancelEditBtn = document.getElementById('cancel-edit-btn');
+        const addQuestionBtn = document.getElementById('add-question-btn');
+        const editQuestionsContainer = document.getElementById('edit-questions-container');
+        const editQuestionNavArea = document.getElementById('edit-question-navigation');
+        const exportArea = document.getElementById('export-area');
+        const exportOutput = document.getElementById('export-output');
+        const copyFeedbackEl = document.getElementById('copy-feedback');
+
+        const mainScoreTextEl = document.getElementById('main-score-text');
+        const questionNavArea = document.getElementById('question-navigation');
+        const questionArea = document.getElementById('question-area');
+        const questionNumberEl = document.getElementById('question-number');
+        const questionTextEl = document.getElementById('question-text');
+        const answerArea = document.getElementById('answer-area');
+        const feedbackArea = document.getElementById('feedback-area');
+        const nextBtn = document.getElementById('next-btn');
+        const prevBtn = document.getElementById('prev-btn');
+        const redoBtn = document.getElementById('redo-btn');
+        const redoPartBtn = document.getElementById('redo-part-btn');
+        const resultsArea = document.getElementById('results-area');
+        const resultsScoreEl = document.getElementById('results-score');
+        const summaryEl = document.getElementById('summary');
+        const restartBtn = document.getElementById('restart-btn');
+
+        let isAnswered = false;
+
+        async function startAudio() {
+            if (!audioStarted) {
+                await Tone.start();
+                audioStarted = true;
+            }
+        }
+        
+        function switchPart(part) {
+            currentPart = part;
+
+            part1Btn.classList.remove('bg-indigo-600', 'text-white');
+            part1Btn.classList.add('bg-white', 'text-gray-900');
+            part2Btn.classList.remove('bg-indigo-600', 'text-white');
+            part2Btn.classList.add('bg-white', 'text-gray-900');
+            part3Btn.classList.remove('bg-indigo-600', 'text-white');
+            part3Btn.classList.add('bg-white', 'text-gray-900');
+            
+            let targetBtn;
+            if (part === 1) {
+                quizData = quizDataPart1;
+                targetBtn = part1Btn;
+            } else if (part === 2){
+                quizData = quizDataPart2;
+                targetBtn = part2Btn;
+            } else {
+                quizData = quizDataPart3;
+                targetBtn = part3Btn;
+            }
+            
+            targetBtn.classList.add('bg-indigo-600', 'text-white');
+            targetBtn.classList.remove('bg-white', 'text-gray-900');
+            
+            document.getElementById('quiz-subtitle').textContent = `Subject: Medical Semiology 2 ( ${quizData.length} questions)`;
+            loadQuizView();
+        }
+
+        function updateScoreText() {
+            mainScoreTextEl.innerHTML = `Score: ${quizState[currentPart].score} / ${quizData.length}`;
+        }
+
+        function startQuiz() {
+            initializeQuiz();
+        }
+        
+        function initializeQuiz() {
+            quizState = {
+                1: { userAnswers: [], score: 0, currentQuestionIndex: 0 },
+                2: { userAnswers: [], score: 0, currentQuestionIndex: 0 },
+                3: { userAnswers: [], score: 0, currentQuestionIndex: 0 }
+            };
+            currentPart = 1;
+            switchPart(1); 
+        }
+        
+        function loadQuizView() {
+            quizView.classList.remove('hidden');
+            editView.classList.add('hidden');
+            practiceSheetView.classList.add('hidden');
+            allQuestionsView.classList.add('hidden');
+            
+            questionNavArea.classList.remove('hidden');
+            questionArea.classList.remove('hidden');
+            answerArea.classList.remove('hidden');
+            resultsArea.classList.add('hidden');
+
+            renderQuestionButtons();
+            showQuestion();
+            updateScoreText();
+        }
+
+        function renderQuestionButtons() {
+            questionNavArea.innerHTML = '';
+            quizData.forEach((_, index) => {
+                const button = document.createElement('button');
+                button.textContent = index + 1;
+                button.classList.add('question-nav-btn', 'border-2', 'border-gray-300', 'rounded-md');
+                button.addEventListener('click', () => {
+                    quizState[currentPart].currentQuestionIndex = index;
+                    showQuestion();
+                });
+                questionNavArea.appendChild(button);
+            });
+        }
+        
+        function updateQuestionButtonStyles() {
+            const buttons = Array.from(questionNavArea.children);
+            buttons.forEach((button, index) => {
+                button.classList.remove('active', 'answered-correct', 'answered-incorrect');
+                if (quizState[currentPart].userAnswers[index]) {
+                    if(quizState[currentPart].userAnswers[index].isCorrect) {
+                        button.classList.add('answered-correct');
+                    } else {
+                        button.classList.add('answered-incorrect');
+                    }
+                }
+            });
+            const currentQuestionIndex = quizState[currentPart].currentQuestionIndex;
+            if(buttons[currentQuestionIndex]) {
+                buttons[currentQuestionIndex].classList.add('active');
+            }
+        }
+
+        function showQuestion() {
+            resetState();
+            if (quizData.length === 0) {
+                questionTextEl.innerHTML = "No questions in this part.";
+                questionNavArea.innerHTML = '';
+                answerArea.innerHTML = '';
+                nextBtn.classList.add('hidden');
+                prevBtn.classList.add('hidden');
+                questionNumberEl.innerHTML = `Question 0/0`;
+                return;
+            }
+            const currentQuestionIndex = quizState[currentPart].currentQuestionIndex;
+            const userAnswers = quizState[currentPart].userAnswers;
+            const currentQuestion = quizData[currentQuestionIndex];
+            isAnswered = userAnswers[currentQuestionIndex] !== undefined;
+
+            if (isAnswered) {
+                redoBtn.classList.remove('hidden');
+            }
+
+            questionNumberEl.innerHTML = `Question ${currentQuestion.number || (currentQuestionIndex + 1)}/${quizData.length}`;
+            
+            if (currentQuestion.type === 'mcq') {
+                questionTextEl.innerHTML = `${currentQuestion.question.en}`;
+                answerArea.className = 'grid grid-cols-1 md-grid-cols-2 gap-4';
+                currentQuestion.options.en.forEach((optionEn) => {
+                    const button = document.createElement('button');
+                    button.innerHTML = `<span>${optionEn}</span>`;
+                    button.classList.add('option-btn', 'w-full', 'p-4', 'border-2', 'border-gray-300', 'rounded-lg', 'text-left', 'hover:bg-gray-100');
+                    button.addEventListener('click', () => selectAnswer(button, optionEn, currentQuestionIndex, answerArea, feedbackArea));
+
+                    if(isAnswered) {
+                        button.disabled = true;
+                        const userAnswerData = userAnswers[currentQuestionIndex];
+                        const correctAnswerEn = currentQuestion.answer.en;
+                        if (optionEn.trim() === correctAnswerEn.trim()){
+                            button.classList.add('correct');
+                        }
+                        if (optionEn.trim() === userAnswerData.answer.trim() && !userAnswerData.isCorrect){
+                            button.classList.add('incorrect');
+                        }
+                    }
+                    answerArea.appendChild(button);
+                });
+            } else if (currentQuestion.type === 'matching') {
+                questionTextEl.innerHTML = `<strong>${currentQuestion.title}</strong>`;
+                answerArea.className = 'flex flex-col';
+                const optionLetters = currentQuestion.options.en.map((_, i) => String.fromCharCode(65 + i));
+                
+                let matchingHTML = `<div class="grid grid-cols-1 md:grid-cols-2 gap-8"><div>`;
+                currentQuestion.stems.en.forEach((stem, index) => {
+                    matchingHTML += `<div class="flex items-center mb-4 gap-2">
+                        <p class="flex-grow">${stem}</p>
+                        <select id="match-select-${index}" class="border-2 border-gray-300 rounded-md p-2">
+                            <option value="-1">Select</option>
+                            ${optionLetters.map(letter => `<option value="${letter}">${letter}</option>`).join('')}
+                        </select>
+                        <span id="correct-answer-span-${index}" class="text-green-600 font-bold w-24 text-left"></span>
+                    </div>`;
+                });
+                matchingHTML += `</div><div>`;
+                currentQuestion.options.en.forEach((option, index) => {
+                    matchingHTML += `<p class="mb-2">${String.fromCharCode(65 + index)}. ${option}</p>`;
+                });
+                matchingHTML += `</div></div>`;
+                answerArea.innerHTML = matchingHTML;
+                
+                if (isAnswered) {
+                    const userAnswerData = userAnswers[currentQuestionIndex];
+                    const selects = currentQuestion.stems.en.map((_, index) => document.getElementById(`match-select-${index}`));
+                    selects.forEach((select, index) => {
+                        const userOptionIndex = userAnswerData.answer[index];
+                        if (userOptionIndex !== -1) select.value = String.fromCharCode(65 + userOptionIndex);
+                        select.disabled = true;
+                        const correctOptionIndex = currentQuestion.answer[index];
+                        if (userOptionIndex === correctOptionIndex) {
+                             select.classList.add('correct');
+                        } else {
+                            select.classList.add('incorrect');
+                            const correctAnswerSpan = document.getElementById(`correct-answer-span-${index}`);
+                            if (correctAnswerSpan) {
+                                correctAnswerSpan.textContent = `Correct: ${String.fromCharCode(65 + correctOptionIndex)}`;
+                            }
+                        }
+                    });
+                } else {
+                    const selects = currentQuestion.stems.en.map((_, index) => document.getElementById(`match-select-${index}`));
+                    selects.forEach((select, index) => {
+                        select.addEventListener('change', () => handleMatchSelection(select, index, currentQuestionIndex, answerArea));
+                    });
+                }
+            } else if (currentQuestion.type === 'comparison-table') {
+                questionTextEl.innerHTML = `<strong>${currentQuestion.question.en}</strong>`;
+                answerArea.className = 'flex flex-col';
+
+                let tableHTML = `<table class="w-full border-collapse border border-gray-300 mt-4"><thead><tr class="bg-gray-100">`;
+                currentQuestion.header_columns.forEach(header => {
+                    tableHTML += `<th class="border border-gray-300 p-2 text-left">${header}</th>`;
+                });
+                tableHTML += `</tr></thead><tbody>`;
+
+                if (isAnswered) {
+                    const userAnswerData = userAnswers[currentQuestionIndex];
+                    if (currentQuestion.row_headers) {
+                        currentQuestion.answer.rows.forEach((row, rowIndex) => {
+                            tableHTML += `<tr>`;
+                            tableHTML += `<td class="border border-gray-300 p-2 align-middle">${row[0]}</td>`;
+                            const correctCell = row[1];
+                            const userAnswerCell = userAnswerData.answer[rowIndex][1];
+                            const isCellCorrect = userAnswerCell.trim().toLowerCase() === correctCell.trim().toLowerCase();
+                            tableHTML += `<td class="border border-gray-300 p-2">
+                                <p class="text-sm font-bold ${isCellCorrect ? 'text-green-700' : 'text-red-700'}">Your Answer:</p>
+                                <p class="mb-2 ${isCellCorrect ? 'text-green-700' : 'text-red-700'}">${userAnswerCell}</p>
+                                ${!isCellCorrect ? `<p class="text-sm font-bold text-blue-700">Correct Answer:</p><p class="text-blue-700">${correctCell}</p>` : ''}
+                            </td>`;
+                            tableHTML += `</tr>`;
+                        });
+                    } else {
+                        currentQuestion.answer.rows.forEach((row, rowIndex) => {
+                            tableHTML += `<tr>`;
+                            row.forEach((correctCell, colIndex) => {
+                                const userAnswerCell = userAnswerData.answer[rowIndex][colIndex];
+                                const isCellCorrect = userAnswerCell.trim().toLowerCase() === correctCell.trim().toLowerCase();
+                                tableHTML += `<td class="border border-gray-300 p-2">
+                                    <p class="text-sm font-bold ${isCellCorrect ? 'text-green-700' : 'text-red-700'}">Your Answer:</p>
+                                    <p class="mb-2 ${isCellCorrect ? 'text-green-700' : 'text-red-700'}">${userAnswerCell}</p>
+                                    ${!isCellCorrect ? `<p class="text-sm font-bold text-blue-700">Correct Answer:</p><p class="text-blue-700">${correctCell}</p>` : ''}
+                                </td>`;
+                            });
+                            tableHTML += `</tr>`;
+                        });
+                    }
+                } else {
+                    if (currentQuestion.row_headers) {
+                        currentQuestion.answer.rows.forEach((row, rowIndex) => {
+                            tableHTML += `<tr>`;
+                            tableHTML += `<td class="border border-gray-300 p-2 align-middle">${row[0]}</td>`;
+                            tableHTML += `<td class="border border-gray-300 p-2"><textarea id="cell-${rowIndex}-1" class="w-full h-12 p-2 border rounded-md" placeholder="Type your answer here..."></textarea></td>`;
+                            tableHTML += `</tr>`;
+                        });
+                    } else {
+                        currentQuestion.answer.rows.forEach((row, rowIndex) => {
+                            tableHTML += `<tr>`;
+                            row.forEach((_, colIndex) => {
+                                tableHTML += `<td class="border border-gray-300 p-2"><textarea id="cell-${rowIndex}-${colIndex}" class="w-full h-24 p-2 border rounded-md" placeholder="Type your answer here..."></textarea></td>`;
+                            });
+                            tableHTML += `</tr>`;
+                        });
+                    }
+                }
+
+                tableHTML += `</tbody></table>`;
+                
+                if (!isAnswered) {
+                    tableHTML += `<button id="submit-table-btn" class="mt-4 bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 self-center">Submit Answer</button>`;
+                }
+
+                answerArea.innerHTML = tableHTML;
+
+                if (!isAnswered) {
+                    document.getElementById('submit-table-btn').addEventListener('click', () => handleTableSubmit(currentQuestionIndex));
+                }
+            } else if (currentQuestion.type === 'image-fill-in-the-blank') {
+                 questionTextEl.innerHTML = `<strong>${currentQuestion.question.en}</strong>`;
+                 answerArea.className = 'flex flex-col items-center';
+                 
+                 let contentHTML = `<img src="${currentQuestion.image_url}" alt="Quiz image" class="max-w-xs md:max-w-sm rounded-lg shadow-md mb-4">`;
+                 
+                 if (isAnswered) {
+                     const userAnswerData = userAnswers[currentQuestionIndex];
+                     contentHTML += `
+                        <div>
+                             <p class="text-sm font-bold ${userAnswerData.isCorrect ? 'text-green-700' : 'text-red-700'}">Your Answer:</p>
+                             <p class="mb-2 text-lg ${userAnswerData.isCorrect ? 'text-green-700' : 'text-red-700'}">${userAnswerData.answer}</p>
+                             ${!userAnswerData.isCorrect ? `<p class="text-sm font-bold text-blue-700">Correct Answer:</p><p class="text-lg text-blue-700">${currentQuestion.answer}</p>` : ''}
+                        </div>
+                     `;
+                 } else {
+                     contentHTML += `
+                        <input type="text" id="fill-in-blank-input" class="p-2 border-2 border-gray-300 rounded-md w-full max-w-md text-center" placeholder="Type your answer...">
+                        <button id="submit-fill-in-blank-btn" class="mt-4 bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700">Submit</button>
+                     `;
+                 }
+
+                 answerArea.innerHTML = contentHTML;
+
+                 if (!isAnswered) {
+                     document.getElementById('submit-fill-in-blank-btn').addEventListener('click', () => handleFillInTheBlankSubmit(currentQuestionIndex));
+                 }
+            }
+            updateQuestionButtonStyles();
+            updateButtonVisibility();
+        }
+        
+        function resetState() {
+            feedbackArea.textContent = '';
+            answerArea.innerHTML = '';
+            redoBtn.classList.add('hidden');
+        }
+
+        function updateButtonVisibility() {
+            const currentQuestionIndex = quizState[currentPart].currentQuestionIndex;
+            prevBtn.classList.toggle('hidden', currentQuestionIndex === 0);
+            const allAnswered = quizState[currentPart].userAnswers.filter(Boolean).length === quizData.length;
+            nextBtn.classList.toggle('hidden', allAnswered);
+
+            if (currentQuestionIndex === quizData.length - 1 || allAnswered) {
+                 nextBtn.innerHTML = `<span class="font-semibold">Show Results</span>`;
+            } else {
+                 nextBtn.innerHTML = `<span class="font-semibold">Next Question</span>`;
+            }
+        }
+
+        async function selectAnswer(button, selectedOptionEn, questionIndex, container, feedbackEl) {
+            await startAudio();
+            if (quizState[currentPart].userAnswers[questionIndex]) return;
+            
+            const allButtons = container.querySelectorAll('button');
+            allButtons.forEach(btn => { btn.disabled = true; });
+
+            const currentQuestion = quizData[questionIndex];
+            const isCorrect = selectedOptionEn.trim() === currentQuestion.answer.en.trim();
+            
+            if (isCorrect) {
+                quizState[currentPart].score++;
+                correctSynth.triggerAttackRelease("C5", "8n", Tone.now());
+                button.classList.add('correct');
+                if (feedbackEl) {
+                    feedbackEl.innerHTML = `Correct!`;
+                    feedbackEl.className = 'mt-2 text-center text-md font-medium text-green-600 practice-feedback';
+                }
+            } else {
+                const now = Tone.now();
+                incorrectSynth.triggerAttackRelease("G3", "16n", now);
+                incorrectSynth.triggerAttackRelease("F#3", "8n", now + 0.1);
+                button.classList.add('incorrect');
+                 if (feedbackEl) {
+                    feedbackEl.innerHTML = `Wrong! The correct answer is: ${currentQuestion.answer.en}`;
+                    feedbackEl.className = 'mt-2 text-center text-md font-medium text-red-600 practice-feedback';
+                }
+                allButtons.forEach(btn => {
+                    if (btn.children[0].textContent.trim() === currentQuestion.answer.en.trim()) {
+                        btn.classList.add('correct');
+                    }
+                });
+            }
+            
+            quizState[currentPart].userAnswers[questionIndex] = { isCorrect, answer: selectedOptionEn };
+
+            if (!practiceSheetView.classList.contains('hidden')) {
+                const practiceRedoBtn = document.getElementById(`ps-redo-btn-${questionIndex}`);
+                if (practiceRedoBtn) practiceRedoBtn.classList.remove('hidden');
+            } else {
+                redoBtn.classList.remove('hidden');
+            }
+
+            updateScoreText();
+            updateQuestionButtonStyles();
+            updateButtonVisibility();
+        }
+        
+        async function handleFillInTheBlankSubmit(questionIndex) {
+            await startAudio();
+            if (quizState[currentPart].userAnswers[questionIndex]) return;
+
+            const input = document.getElementById('fill-in-blank-input');
+            const submitBtn = document.getElementById('submit-fill-in-blank-btn');
+            const userAnswer = input.value;
+            const currentQuestion = quizData[questionIndex];
+            const isCorrect = userAnswer.trim().toLowerCase() === currentQuestion.answer.trim().toLowerCase();
+            
+            input.disabled = true;
+            submitBtn.classList.add('hidden');
+
+            if (isCorrect) {
+                quizState[currentPart].score++;
+                correctSynth.triggerAttackRelease("C5", "8n", Tone.now());
+                input.classList.add('correct');
+            } else {
+                const now = Tone.now();
+                incorrectSynth.triggerAttackRelease("G3", "16n", now);
+                incorrectSynth.triggerAttackRelease("F#3", "8n", now + 0.1);
+                input.classList.add('incorrect');
+                
+                const feedbackEl = document.createElement('div');
+                feedbackEl.className = "text-center mt-2";
+                feedbackEl.innerHTML = `<p class="text-sm font-bold text-blue-700">Correct Answer:</p><p class="text-lg text-blue-700">${currentQuestion.answer}</p>`;
+                answerArea.appendChild(feedbackEl);
+            }
+            
+            quizState[currentPart].userAnswers[questionIndex] = { isCorrect, answer: userAnswer };
+            redoBtn.classList.remove('hidden');
+            updateScoreText();
+            updateQuestionButtonStyles();
+            updateButtonVisibility();
+        }
+
+        async function handleTableSubmit(questionIndex) {
+            await startAudio();
+            if (quizState[currentPart].userAnswers[questionIndex]) return;
+
+            const currentQuestion = quizData[questionIndex];
+            const userAnswersGrid = [];
+            let allCorrect = true;
+
+            if (currentQuestion.row_headers) {
+                currentQuestion.answer.rows.forEach((row, rowIndex) => {
+                    const userAnswerRow = [row[0]]; // Start with the header
+                    const textarea = document.getElementById(`cell-${rowIndex}-1`);
+                    const userAnswer = textarea.value;
+                    userAnswerRow.push(userAnswer);
+                    
+                    const correctCell = row[1];
+                    const isCellCorrect = userAnswer.trim().toLowerCase() === correctCell.trim().toLowerCase();
+                    
+                    textarea.disabled = true;
+                    if (isCellCorrect) {
+                        textarea.classList.add('bg-green-100', 'border-green-400');
+                    } else {
+                        textarea.classList.add('bg-red-100', 'border-red-400');
+                        allCorrect = false;
+
+                        const feedbackEl = document.createElement('div');
+                        feedbackEl.innerHTML = `<p class="text-xs font-bold mt-1 text-blue-700">Correct:</p><p class="text-xs text-blue-700">${correctCell}</p>`;
+                        textarea.parentNode.appendChild(feedbackEl);
+                    }
+                    userAnswersGrid.push(userAnswerRow);
+                });
+            } else {
+                 currentQuestion.answer.rows.forEach((row, rowIndex) => {
+                    const userAnswerRow = [];
+                    row.forEach((correctCell, colIndex) => {
+                        const textarea = document.getElementById(`cell-${rowIndex}-${colIndex}`);
+                        const userAnswer = textarea.value;
+                        userAnswerRow.push(userAnswer);
+                        const isCellCorrect = userAnswer.trim().toLowerCase() === correctCell.trim().toLowerCase();
+                        
+                        textarea.disabled = true;
+                        if (isCellCorrect) {
+                            textarea.classList.add('bg-green-100', 'border-green-400');
+                        } else {
+                            textarea.classList.add('bg-red-100', 'border-red-400');
+                            allCorrect = false;
+
+                            const feedbackEl = document.createElement('div');
+                            feedbackEl.innerHTML = `<p class="text-xs font-bold mt-1 text-blue-700">Correct:</p><p class="text-xs text-blue-700">${correctCell}</p>`;
+                            textarea.parentNode.appendChild(feedbackEl);
+                        }
+                    });
+                    userAnswersGrid.push(userAnswerRow);
+                });
+            }
+           
+            if (allCorrect) {
+                quizState[currentPart].score++;
+                correctSynth.triggerAttackRelease("C5", "8n", Tone.now());
+            } else {
+                const now = Tone.now();
+                incorrectSynth.triggerAttackRelease("G3", "16n", now);
+                incorrectSynth.triggerAttackRelease("F#3", "8n", now + 0.1);
+            }
+            
+            document.getElementById('submit-table-btn').classList.add('hidden');
+
+            quizState[currentPart].userAnswers[questionIndex] = { isCorrect: allCorrect, answer: userAnswersGrid };
+            
+            redoBtn.classList.remove('hidden');
+
+            updateScoreText();
+            updateQuestionButtonStyles();
+            updateButtonVisibility();
+        }
+
+        async function handleMatchSelection(selectElement, stemIndex, questionIndex, container) {
+            await startAudio();
+            const currentQuestion = quizData[questionIndex];
+            const userOptionIndex = selectElement.value !== "-1" ? selectElement.value.charCodeAt(0) - 65 : -1;
+            const correctOptionIndex = currentQuestion.answer[stemIndex];
+
+            if (userOptionIndex === correctOptionIndex) {
+                correctSynth.triggerAttackRelease("C5", "8n", Tone.now());
+                selectElement.classList.add('correct');
+                selectElement.classList.remove('incorrect');
+            } else {
+                const now = Tone.now();
+                incorrectSynth.triggerAttackRelease("G3", "16n", now);
+                incorrectSynth.triggerAttackRelease("F#3", "8n", now + 0.1);
+                selectElement.classList.add('incorrect');
+                selectElement.classList.remove('correct');
+                const correctAnswerSpanId = container.id === 'answer-area' ? `correct-answer-span-${stemIndex}` : `ps-correct-answer-span-${questionIndex}-${stemIndex}`;
+                const correctAnswerSpan = document.getElementById(correctAnswerSpanId);
+                if (correctAnswerSpan) {
+                    correctAnswerSpan.textContent = `Correct: ${String.fromCharCode(65 + correctOptionIndex)}`;
+                }
+            }
+            selectElement.disabled = true;
+            
+            const allSelects = Array.from(container.querySelectorAll('select'));
+            const allAnswered = allSelects.every(s => s.disabled);
+
+            if (allAnswered) {
+                if (quizState[currentPart].userAnswers[questionIndex]) return;
+                const userSelections = {};
+                let correctMatches = 0;
+                allSelects.forEach((s, i) => {
+                    const selectedVal = s.value !== "-1" ? s.value.charCodeAt(0) - 65 : -1;
+                    userSelections[i] = selectedVal;
+                    if (selectedVal === currentQuestion.answer[i]) correctMatches++;
+                });
+                
+                const isFullyCorrect = correctMatches === currentQuestion.stems.en.length;
+                if (isFullyCorrect) quizState[currentPart].score++;
+                
+                quizState[currentPart].userAnswers[questionIndex] = { isCorrect: isFullyCorrect, answer: userSelections };
+                
+                if (!practiceSheetView.classList.contains('hidden')) {
+                    const practiceRedoBtn = document.getElementById(`ps-redo-btn-${questionIndex}`);
+                    if (practiceRedoBtn) practiceRedoBtn.classList.remove('hidden');
+                } else {
+                    redoBtn.classList.remove('hidden');
+                }
+                
+                updateScoreText();
+                updateQuestionButtonStyles();
+                updateButtonVisibility();
+            }
+        }
+
+        function togglePracticeSheetView() {
+            quizView.classList.toggle('hidden');
+            practiceSheetView.classList.toggle('hidden');
+            allQuestionsView.classList.add('hidden');
+
+            if (!practiceSheetView.classList.contains('hidden')) {
+                renderPracticeSheet();
+                practiceSheetBtn.textContent = 'Back to Quiz';
+            } else {
+                practiceSheetBtn.textContent = 'Practice Sheet';
+                loadQuizView(); // Reload single question view to reflect any changes
+            }
+        }
+
+        function toggleAllQuestionsView() {
+            quizView.classList.toggle('hidden');
+            allQuestionsView.classList.toggle('hidden');
+            practiceSheetView.classList.add('hidden');
+
+            if (!allQuestionsView.classList.contains('hidden')) {
+                renderAllQuestions();
+                showAllBtn.textContent = 'Back to Quiz';
+            } else {
+                showAllBtn.textContent = 'Show Answers';
+            }
+        }
+
+        function renderAllQuestions() {
+            allQuestionsView.innerHTML = ''; // Clear previous content
+
+            const title = document.createElement('h2');
+            title.className = 'text-3xl font-bold text-center mb-6 text-gray-800';
+            title.textContent = `All Questions & Answers - Part ${currentPart}`;
+            allQuestionsView.appendChild(title);
+
+            quizData.forEach(q => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'mb-6 p-4 border rounded-lg bg-gray-50';
+
+                let contentHTML = `<p class="font-bold text-lg mb-2">${q.number}. ${q.type === 'mcq' ? q.question.en : (q.title || q.question.en)}</p>`;
+
+                if (q.type === 'mcq') {
+                    contentHTML += '<ul class="list-disc list-inside space-y-1">';
+                    q.options.en.forEach(option => {
+                        const isCorrect = option.trim() === q.answer.en.trim();
+                        contentHTML += `<li class="${isCorrect ? 'text-green-700 font-semibold' : 'text-gray-700'}">${option}${isCorrect ? ' &check;' : ''}</li>`;
+                    });
+                    contentHTML += '</ul>';
+                } else if (q.type === 'matching') {
+                    contentHTML += '<ul class="list-none space-y-1 mt-2">';
+                     q.stems.en.forEach((stem, index) => {
+                        const correctOptionIndex = q.answer[index];
+                        const correctOptionText = q.options.en[correctOptionIndex];
+                        contentHTML += `<li class="text-gray-800">${stem} &rarr; <span class="font-semibold text-green-700">${correctOptionText}</span></li>`;
+                    });
+                    contentHTML += '</ul>';
+                } else if (q.type === 'comparison-table') {
+                    contentHTML += `<table class="w-full text-left border-collapse mt-2"><thead><tr class="bg-gray-200">`;
+                    q.header_columns.forEach(h => contentHTML += `<th class="p-2 border">${h}</th>`);
+                    contentHTML += `</tr></thead><tbody>`;
+                    q.answer.rows.forEach(row => {
+                        contentHTML += `<tr>`;
+                        row.forEach(cell => {
+                            contentHTML += `<td class="p-2 border">${cell}</td>`;
+                        });
+                        contentHTML += `</tr>`;
+                    });
+                    contentHTML += `</tbody></table>`;
+                } else if (q.type === 'image-fill-in-the-blank') {
+                    contentHTML += `<div class="flex flex-col sm:flex-row gap-4 items-center">
+                        <img src="${q.image_url}" class="w-48 h-auto rounded-md">
+                        <p class="text-green-700 font-semibold text-lg">&rarr; ${q.answer}</p>
+                    </div>`;
+                }
+                questionDiv.innerHTML = contentHTML;
+                allQuestionsView.appendChild(questionDiv);
+            });
+            
+            const backBtn = document.createElement('button');
+            backBtn.className = 'mt-8 bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 transition-colors duration-300 shadow-lg block mx-auto';
+            backBtn.innerHTML = '<span class="font-semibold">Back to Quiz</span>';
+            backBtn.addEventListener('click', toggleAllQuestionsView);
+            allQuestionsView.appendChild(backBtn);
+        }
+
+        function renderPracticeSheet() {
+            practiceSheetView.innerHTML = ''; 
+            const title = document.createElement('h2');
+            title.className = 'text-3xl font-bold text-center mb-6 text-gray-800';
+            title.textContent = `Practice Sheet - Part ${currentPart}`;
+            practiceSheetView.appendChild(title);
+
+            quizData.forEach((q, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.id = `ps-question-${index}`;
+                questionDiv.className = 'mb-6 p-4 border rounded-lg bg-gray-50';
+                
+                const questionHeader = document.createElement('div');
+                questionHeader.className = 'flex justify-between items-start';
+                
+                const questionTitle = document.createElement('p');
+                questionTitle.className = 'font-bold text-lg mb-2 flex-grow';
+                questionTitle.innerHTML = `${q.number}. ${q.type === 'mcq' ? q.question.en : (q.title || q.question.en)}`;
+                
+                const redoBtn = document.createElement('button');
+                redoBtn.id = `ps-redo-btn-${index}`;
+                redoBtn.textContent = 'Redo';
+                redoBtn.className = 'hidden bg-yellow-500 text-white font-bold py-1 px-4 rounded-lg hover:bg-yellow-600 text-sm';
+                redoBtn.addEventListener('click', () => redoPracticeSheetQuestion(index));
+                
+                questionHeader.appendChild(questionTitle);
+                questionHeader.appendChild(redoBtn);
+
+                const answersContainer = document.createElement('div');
+                const feedbackEl = document.createElement('div');
+                feedbackEl.className = 'practice-feedback';
+
+                questionDiv.appendChild(questionHeader);
+
+                if (q.type === 'mcq') {
+                    answersContainer.className = 'grid grid-cols-1 md:grid-cols-2 gap-3 mt-4';
+                    q.options.en.forEach(optionEn => {
+                        const button = document.createElement('button');
+                        button.innerHTML = `<span>${optionEn}</span>`;
+                        button.className = 'option-btn w-full p-3 border-2 border-gray-300 rounded-lg text-left hover:bg-gray-100';
+                        button.addEventListener('click', () => selectAnswer(button, optionEn, index, answersContainer, feedbackEl));
+                        answersContainer.appendChild(button);
+                    });
+                } else if (q.type === 'matching') {
+                    const optionLetters = q.options.en.map((_, i) => String.fromCharCode(65 + i));
+                    let matchingHTML = `<div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-4"><div>`;
+                    q.stems.en.forEach((stem, stemIndex) => {
+                        matchingHTML += `<div class="flex items-center mb-4 gap-2">
+                            <p class="flex-grow">${stem}</p>
+                            <select id="ps-match-select-${index}-${stemIndex}" class="border-2 border-gray-300 rounded-md p-2">
+                                <option value="-1">Select</option>
+                                ${optionLetters.map(letter => `<option value="${letter}">${letter}</option>`).join('')}
+                            </select>
+                            <span id="ps-correct-answer-span-${index}-${stemIndex}" class="text-green-600 font-bold w-24 text-left"></span>
+                        </div>`;
+                    });
+                    matchingHTML += `</div><div>`;
+                    q.options.en.forEach((option, i) => {
+                        matchingHTML += `<p class="mb-2">${String.fromCharCode(65 + i)}. ${option}</p>`;
+                    });
+                    matchingHTML += `</div></div>`;
+                    answersContainer.innerHTML = matchingHTML;
+                } else if (q.type === 'comparison-table') {
+                    answersContainer.className = 'mt-4';
+                    let tableHTML = `<table class="w-full border-collapse border border-gray-300"><thead><tr class="bg-gray-100">`;
+                    q.header_columns.forEach(header => {
+                        tableHTML += `<th class="border border-gray-300 p-2 text-left">${header}</th>`;
+                    });
+                    tableHTML += `</tr></thead><tbody>`;
+
+                    if (q.row_headers) {
+                        q.answer.rows.forEach((row, rowIndex) => {
+                            tableHTML += `<tr>`;
+                            tableHTML += `<td class="border border-gray-300 p-2 align-middle">${row[0]}</td>`;
+                            tableHTML += `<td class="border border-gray-300 p-2"><textarea id="ps-cell-${index}-${rowIndex}-1" class="w-full h-12 p-2 border rounded-md" placeholder="Type..."></textarea></td>`;
+                            tableHTML += `</tr>`;
+                        });
+                    } else {
+                        q.answer.rows.forEach((row, rowIndex) => {
+                            tableHTML += `<tr>`;
+                            row.forEach((_, colIndex) => {
+                                tableHTML += `<td class="border border-gray-300 p-2"><textarea id="ps-cell-${index}-${rowIndex}-${colIndex}" class="w-full h-24 p-2 border rounded-md" placeholder="Type..."></textarea></td>`;
+                            });
+                            tableHTML += `</tr>`;
+                        });
+                    }
+                    
+                    tableHTML += `</tbody></table><button id="ps-submit-table-btn-${index}" class="mt-4 bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700">Submit</button>`;
+                    answersContainer.innerHTML = tableHTML;
+                } else if (q.type === 'image-fill-in-the-blank') {
+                    answersContainer.className = 'mt-4 flex flex-col items-center';
+                    answersContainer.innerHTML = `
+                        <img src="${q.image_url}" alt="Quiz image" class="max-w-xs rounded-lg shadow-md mb-4">
+                        <input type="text" id="ps-fill-in-blank-input-${index}" class="p-2 border-2 border-gray-300 rounded-md w-full max-w-md text-center" placeholder="Type your answer...">
+                        <button id="ps-submit-fill-in-blank-btn-${index}" class="mt-4 bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700">Submit</button>
+                    `;
+                }
+
+                questionDiv.appendChild(answersContainer);
+                questionDiv.appendChild(feedbackEl);
+                practiceSheetView.appendChild(questionDiv);
+
+                 if (q.type === 'matching') {
+                    q.stems.en.forEach((_, stemIndex) => {
+                         const selectEl = document.getElementById(`ps-match-select-${index}-${stemIndex}`);
+                         selectEl.addEventListener('change', () => handleMatchSelection(selectEl, stemIndex, index, answersContainer));
+                    });
+                } else if (q.type === 'comparison-table') {
+                    const submitBtn = document.getElementById(`ps-submit-table-btn-${index}`);
+                    submitBtn.addEventListener('click', () => handlePracticeTableSubmit(index));
+                } else if (q.type === 'image-fill-in-the-blank') {
+                    const submitBtn = document.getElementById(`ps-submit-fill-in-blank-btn-${index}`);
+                    submitBtn.addEventListener('click', () => handlePracticeFillInBlankSubmit(index));
+                }
+
+                if (quizState[currentPart].userAnswers[index]) {
+                    redoBtn.classList.remove('hidden');
+                    const userAnswerData = quizState[currentPart].userAnswers[index];
+                    if (q.type === 'mcq') {
+                        Array.from(answersContainer.children).forEach(button => {
+                            button.disabled = true;
+                            const optionText = button.textContent.trim();
+                             if (optionText === q.answer.en.trim()) button.classList.add('correct');
+                             if (optionText === userAnswerData.answer.trim() && !userAnswerData.isCorrect) button.classList.add('incorrect');
+                        });
+                    } else if (q.type === 'matching') {
+                        const selects = q.stems.en.map((_, stemIndex) => document.getElementById(`ps-match-select-${index}-${stemIndex}`));
+                        selects.forEach((select, stemIndex) => {
+                            select.disabled = true;
+                            const userOptionIndex = userAnswerData.answer[stemIndex];
+                            if(userOptionIndex !== -1) select.value = String.fromCharCode(65 + userOptionIndex);
+                            const correctOptionIndex = q.answer[stemIndex];
+                            if(userOptionIndex === correctOptionIndex) select.classList.add('correct');
+                            else {
+                                select.classList.add('incorrect');
+                                const span = document.getElementById(`ps-correct-answer-span-${index}-${stemIndex}`);
+                                if (span) span.textContent = `Correct: ${String.fromCharCode(65 + correctOptionIndex)}`;
+                            }
+                        });
+                    } else if (q.type === 'comparison-table') {
+                        const submitBtn = document.getElementById(`ps-submit-table-btn-${index}`);
+                        submitBtn.classList.add('hidden');
+                        if (q.row_headers) {
+                             q.answer.rows.forEach((row, rIndex) => {
+                                const textarea = document.getElementById(`ps-cell-${index}-${rIndex}-1`);
+                                textarea.value = userAnswerData.answer[rIndex][1];
+                                textarea.disabled = true;
+                                const correctCell = row[1];
+                                const isCellCorrect = userAnswerData.answer[rIndex][1].trim().toLowerCase() === correctCell.trim().toLowerCase();
+                                if (isCellCorrect) {
+                                    textarea.classList.add('bg-green-100', 'border-green-400');
+                                } else {
+                                    textarea.classList.add('bg-red-100', 'border-red-400');
+                                    const feedbackEl = document.createElement('div');
+                                    feedbackEl.innerHTML = `<p class="text-xs font-bold mt-1 text-blue-700">Correct:</p><p class="text-xs text-blue-700">${correctCell}</p>`;
+                                    textarea.parentNode.appendChild(feedbackEl);
+                                }
+                            });
+                        } else {
+                            q.answer.rows.forEach((row, rIndex) => {
+                                row.forEach((correctCell, cIndex) => {
+                                    const textarea = document.getElementById(`ps-cell-${index}-${rIndex}-${cIndex}`);
+                                    textarea.value = userAnswerData.answer[rIndex][cIndex];
+                                    textarea.disabled = true;
+                                    const isCellCorrect = userAnswerData.answer[rIndex][cIndex].trim().toLowerCase() === correctCell.trim().toLowerCase();
+                                    if (isCellCorrect) {
+                                         textarea.classList.add('bg-green-100', 'border-green-400');
+                                    } else {
+                                        textarea.classList.add('bg-red-100', 'border-red-400');
+                                        const feedbackEl = document.createElement('div');
+                                        feedbackEl.innerHTML = `<p class="text-xs font-bold mt-1 text-blue-700">Correct:</p><p class="text-xs text-blue-700">${correctCell}</p>`;
+                                        textarea.parentNode.appendChild(feedbackEl);
+                                    }
+                                });
+                            });
+                        }
+                    } else if (q.type === 'image-fill-in-the-blank') {
+                        const input = document.getElementById(`ps-fill-in-blank-input-${index}`);
+                        const submitBtn = document.getElementById(`ps-submit-fill-in-blank-btn-${index}`);
+                        input.value = userAnswerData.answer;
+                        input.disabled = true;
+                        submitBtn.classList.add('hidden');
+                        if (userAnswerData.isCorrect) {
+                            input.classList.add('correct');
+                        } else {
+                            input.classList.add('incorrect');
+                            const feedbackDiv = document.createElement('div');
+                            feedbackDiv.className = 'text-center mt-2';
+                            feedbackDiv.innerHTML = `<p class="text-sm font-bold text-blue-700">Correct Answer:</p><p class="text-lg text-blue-700">${q.answer}</p>`;
+                            answersContainer.appendChild(feedbackDiv);
+                        }
+                    }
+                }
+            });
+            
+            const backBtn = document.createElement('button');
+            backBtn.className = 'mt-8 bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 transition-colors duration-300 shadow-lg block mx-auto';
+            backBtn.innerHTML = '<span class="font-semibold">Back to Quiz</span>';
+            backBtn.addEventListener('click', togglePracticeSheetView);
+            practiceSheetView.appendChild(backBtn);
+        }
+
+        async function handlePracticeFillInBlankSubmit(questionIndex) {
+            await startAudio();
+            if (quizState[currentPart].userAnswers[questionIndex]) return;
+
+            const input = document.getElementById(`ps-fill-in-blank-input-${questionIndex}`);
+            const submitBtn = document.getElementById(`ps-submit-fill-in-blank-btn-${questionIndex}`);
+            const userAnswer = input.value;
+            const currentQuestion = quizData[questionIndex];
+            const isCorrect = userAnswer.trim().toLowerCase() === currentQuestion.answer.trim().toLowerCase();
+            
+            input.disabled = true;
+            submitBtn.classList.add('hidden');
+
+            if (isCorrect) {
+                quizState[currentPart].score++;
+                correctSynth.triggerAttackRelease("C5", "8n", Tone.now());
+                input.classList.add('correct');
+            } else {
+                const now = Tone.now();
+                incorrectSynth.triggerAttackRelease("G3", "16n", now);
+                incorrectSynth.triggerAttackRelease("F#3", "8n", now + 0.1);
+                input.classList.add('incorrect');
+                
+                const feedbackEl = document.createElement('div');
+                feedbackEl.className = "text-center mt-2";
+                feedbackEl.innerHTML = `<p class="text-sm font-bold text-blue-700">Correct Answer:</p><p class="text-lg text-blue-700">${currentQuestion.answer}</p>`;
+                input.parentElement.appendChild(feedbackEl);
+            }
+            
+            quizState[currentPart].userAnswers[questionIndex] = { isCorrect, answer: userAnswer };
+            document.getElementById(`ps-redo-btn-${questionIndex}`).classList.remove('hidden');
+            updateScoreText();
+            updateQuestionButtonStyles();
+        }
+        
+        async function handlePracticeTableSubmit(questionIndex) {
+            await startAudio();
+            if (quizState[currentPart].userAnswers[questionIndex]) return;
+
+            const currentQuestion = quizData[questionIndex];
+            const userAnswersGrid = [];
+            let allCorrect = true;
+
+            if (currentQuestion.row_headers) {
+                 currentQuestion.answer.rows.forEach((row, rowIndex) => {
+                    const userAnswerRow = [row[0]];
+                    const textarea = document.getElementById(`ps-cell-${questionIndex}-${rowIndex}-1`);
+                    const userAnswer = textarea.value;
+                    userAnswerRow.push(userAnswer);
+                    const isCellCorrect = userAnswer.trim().toLowerCase() === row[1].trim().toLowerCase();
+                    
+                    textarea.disabled = true;
+                    if (isCellCorrect) {
+                        textarea.classList.add('bg-green-100', 'border-green-400');
+                    } else {
+                        textarea.classList.add('bg-red-100', 'border-red-400');
+                        allCorrect = false;
+
+                        const feedbackEl = document.createElement('div');
+                        feedbackEl.innerHTML = `<p class="text-xs font-bold mt-1 text-blue-700">Correct:</p><p class="text-xs text-blue-700">${row[1]}</p>`;
+                        textarea.parentNode.appendChild(feedbackEl);
+                    }
+                    userAnswersGrid.push(userAnswerRow);
+                });
+            } else {
+                 currentQuestion.answer.rows.forEach((row, rowIndex) => {
+                    const userAnswerRow = [];
+                    row.forEach((correctCell, colIndex) => {
+                        const textarea = document.getElementById(`ps-cell-${questionIndex}-${rowIndex}-${colIndex}`);
+                        const userAnswer = textarea.value;
+                        userAnswerRow.push(userAnswer);
+                        const isCellCorrect = userAnswer.trim().toLowerCase() === correctCell.trim().toLowerCase();
+                        
+                        textarea.disabled = true;
+                        if (isCellCorrect) {
+                            textarea.classList.add('bg-green-100', 'border-green-400');
+                        } else {
+                            textarea.classList.add('bg-red-100', 'border-red-400');
+                            allCorrect = false;
+
+                            const feedbackEl = document.createElement('div');
+                            feedbackEl.innerHTML = `<p class="text-xs font-bold mt-1 text-blue-700">Correct:</p><p class="text-xs text-blue-700">${correctCell}</p>`;
+                            textarea.parentNode.appendChild(feedbackEl);
+                        }
+                    });
+                    userAnswersGrid.push(userAnswerRow);
+                });
+            }
+
+            if (allCorrect) {
+                quizState[currentPart].score++;
+                correctSynth.triggerAttackRelease("C5", "8n", Tone.now());
+            } else {
+                const now = Tone.now();
+                incorrectSynth.triggerAttackRelease("G3", "16n", now);
+                incorrectSynth.triggerAttackRelease("F#3", "8n", now + 0.1);
+            }
+            
+            document.getElementById(`ps-submit-table-btn-${questionIndex}`).classList.add('hidden');
+            quizState[currentPart].userAnswers[questionIndex] = { isCorrect: allCorrect, answer: userAnswersGrid };
+            
+            document.getElementById(`ps-redo-btn-${questionIndex}`).classList.remove('hidden');
+            
+            updateScoreText();
+            updateQuestionButtonStyles();
+        }
+
+        function redoPracticeSheetQuestion(questionIndex) {
+            const answerData = quizState[currentPart].userAnswers[questionIndex];
+            if (!answerData) return;
+
+            if (answerData.isCorrect) {
+                quizState[currentPart].score--;
+            }
+
+            quizState[currentPart].userAnswers[questionIndex] = undefined;
+            updateScoreText();
+            updateQuestionButtonStyles();
+
+            const questionContainer = document.getElementById(`ps-question-${questionIndex}`);
+            if (!questionContainer) return;
+
+            const question = quizData[questionIndex];
+            
+            if (question.type === 'mcq') {
+                const buttons = questionContainer.querySelectorAll('button.option-btn');
+                buttons.forEach(btn => {
+                    btn.disabled = false;
+                    btn.classList.remove('correct', 'incorrect');
+                });
+            } else if (question.type === 'matching') {
+                const selects = questionContainer.querySelectorAll('select');
+                selects.forEach((select, stemIndex) => {
+                    select.disabled = false;
+                    select.value = '-1';
+                    select.classList.remove('correct', 'incorrect');
+                    const span = document.getElementById(`ps-correct-answer-span-${questionIndex}-${stemIndex}`);
+                    if (span) span.textContent = '';
+                });
+            } else if (question.type === 'comparison-table') {
+                if (question.row_headers) {
+                    question.answer.rows.forEach((row, rIndex) => {
+                        const textarea = document.getElementById(`ps-cell-${questionIndex}-${rIndex}-1`);
+                        textarea.disabled = false;
+                        textarea.value = '';
+                        textarea.classList.remove('bg-green-100', 'border-green-400', 'bg-red-100', 'border-red-400');
+                        const parent = textarea.parentNode;
+                        while (parent.children.length > 1) {
+                            parent.removeChild(parent.lastChild);
+                        }
+                    });
+                } else {
+                     question.answer.rows.forEach((row, rIndex) => {
+                        row.forEach((_, cIndex) => {
+                            const textarea = document.getElementById(`ps-cell-${questionIndex}-${rIndex}-${cIndex}`);
+                            textarea.disabled = false;
+                            textarea.value = '';
+                            textarea.classList.remove('bg-green-100', 'border-green-400', 'bg-red-100', 'border-red-400');
+                            const parent = textarea.parentNode;
+                            while(parent.children.length > 1) {
+                                parent.removeChild(parent.lastChild);
+                            }
+                        });
+                    });
+                }
+                const submitBtn = document.getElementById(`ps-submit-table-btn-${questionIndex}`);
+                if(submitBtn) submitBtn.classList.remove('hidden');
+            } else if (question.type === 'image-fill-in-the-blank') {
+                const input = document.getElementById(`ps-fill-in-blank-input-${questionIndex}`);
+                input.disabled = false;
+                input.value = '';
+                input.classList.remove('correct', 'incorrect');
+                const submitBtn = document.getElementById(`ps-submit-fill-in-blank-btn-${questionIndex}`);
+                if(submitBtn) submitBtn.classList.remove('hidden');
+                const parent = input.parentElement;
+                const feedback = parent.querySelector('div');
+                if (feedback) parent.removeChild(feedback);
+            }
+
+
+            const feedbackEl = questionContainer.querySelector('.practice-feedback');
+            if (feedbackEl) feedbackEl.innerHTML = '';
+            
+            const redoButton = document.getElementById(`ps-redo-btn-${questionIndex}`);
+            if (redoButton) redoButton.classList.add('hidden');
+        }
+
+
+        function showResults() {
+            questionNavArea.classList.add('hidden');
+            questionArea.classList.add('hidden');
+            answerArea.classList.add('hidden');
+            nextBtn.classList.add('hidden');
+            prevBtn.classList.add('hidden');
+            redoBtn.classList.add('hidden');
+            feedbackArea.textContent = '';
+            resultsArea.classList.remove('hidden');
+            resultsScoreEl.innerHTML = `Your final score is ${quizState[currentPart].score} out of ${quizData.length}.`;
+            summaryEl.innerHTML = `<div class="text-center mb-4"><h3 class="text-xl font-bold text-gray-700">Review Your Answers:</h3></div>`; 
+            
+            quizState[currentPart].userAnswers.forEach((ua, index) => {
+                if (!ua) return;
+                const qData = quizData[index];
+                const resultDiv = document.createElement('div');
+                resultDiv.classList.add('mb-4', 'p-3', 'rounded-md', ua.isCorrect ? 'bg-blue-100' : 'bg-red-100');
+                
+                if (qData.type === 'mcq') {
+                    const correctAnswerText = !ua.isCorrect ? `Correct answer: ${qData.answer.en}` : '';
+                    resultDiv.innerHTML = `
+                        <p class="font-semibold">${qData.number}. ${qData.question.en}</p>
+                        <p class="text-sm ${ua.isCorrect ? 'text-blue-700' : 'text-red-700'}">Your answer: ${ua.answer}</p>
+                        <p class="text-sm text-gray-600">${correctAnswerText}</p>`;
+                } else if (qData.type === 'matching') {
+                    let matchesHTML = '';
+                    qData.stems.en.forEach((stem, stemIndex) => {
+                        const userLetter = ua.answer[stemIndex] !== -1 ? String.fromCharCode(65 + ua.answer[stemIndex]) : 'None';
+                        const correctLetter = String.fromCharCode(65 + qData.answer[stemIndex]);
+                        const isMatchCorrect = ua.answer[stemIndex] === qData.answer[stemIndex];
+                        matchesHTML += `<li class="text-sm ${isMatchCorrect ? 'text-blue-700' : 'text-red-700'}">
+                            ${stem} &rarr; Your answer: ${userLetter}. ${!isMatchCorrect ? `Correct: ${correctLetter}` : ''}</li>`;
+                    });
+                    resultDiv.innerHTML = `<p class="font-semibold">${qData.number}. ${qData.title}</p>
+                        <ul class="list-disc list-inside mt-2">${matchesHTML}</ul>`;
+                } else if (qData.type === 'comparison-table') {
+                    let tableReviewHTML = `<table class="w-full text-left border-collapse mt-2"><thead><tr class="bg-gray-200">`;
+                    qData.header_columns.forEach(h => tableReviewHTML += `<th class="p-2 border">${h}</th>`);
+                    tableReviewHTML += `</tr></thead><tbody>`;
+
+                    if (qData.row_headers) {
+                        qData.answer.rows.forEach((row, rIndex) => {
+                            tableReviewHTML += `<tr>`;
+                            tableReviewHTML += `<td class="p-2 border">${row[0]}</td>`;
+                            const correctCell = row[1];
+                            const userCell = ua.answer[rIndex][1];
+                            const isCellCorrect = userCell.trim().toLowerCase() === correctCell.trim().toLowerCase();
+                            tableReviewHTML += `<td class="p-2 border ${isCellCorrect ? 'bg-green-50' : 'bg-red-50'}">
+                                <p class="text-xs font-bold">Your Answer:</p>
+                                <p class="text-sm mb-1">${userCell}</p>
+                                ${!isCellCorrect ? `<p class="text-xs font-bold">Correct:</p><p class="text-sm">${correctCell}</p>` : ''}
+                            </td>`;
+                            tableReviewHTML += `</tr>`;
+                        });
+                    } else {
+                        qData.answer.rows.forEach((row, rIndex) => {
+                            tableReviewHTML += `<tr>`;
+                            row.forEach((correctCell, cIndex) => {
+                                const userCell = ua.answer[rIndex][cIndex];
+                                const isCellCorrect = userCell.trim().toLowerCase() === correctCell.trim().toLowerCase();
+                                tableReviewHTML += `<td class="p-2 border ${isCellCorrect ? 'bg-green-50' : 'bg-red-50'}">
+                                    <p class="text-xs font-bold">Your Answer:</p>
+                                    <p class="text-sm mb-1">${userCell}</p>
+                                    ${!isCellCorrect ? `<p class="text-xs font-bold">Correct:</p><p class="text-sm">${correctCell}</p>` : ''}
+                                </td>`;
+                            });
+                            tableReviewHTML += `</tr>`;
+                        });
+                    }
+                    tableReviewHTML += `</tbody></table>`;
+                    resultDiv.innerHTML = `<p class="font-semibold">${qData.number}. ${qData.question.en}</p>${tableReviewHTML}`;
+                } else if (qData.type === 'image-fill-in-the-blank') {
+                    const correctAnswerText = !ua.isCorrect ? `Correct answer: ${qData.answer}` : '';
+                    resultDiv.innerHTML = `
+                        <p class="font-semibold">${qData.number}. ${qData.question.en}</p>
+                        <div class="flex items-center gap-4 mt-2">
+                           <img src="${qData.image_url}" class="w-24 h-auto rounded-md">
+                           <div>
+                                <p class="text-sm ${ua.isCorrect ? 'text-blue-700' : 'text-red-700'}">Your answer: ${ua.answer}</p>
+                                <p class="text-sm text-gray-600">${correctAnswerText}</p>
+                           </div>
+                        </div>
+                    `;
+                }
+                summaryEl.appendChild(resultDiv);
+            });
+        }
+        
+        function redoQuestion() {
+            const currentQuestionIndex = quizState[currentPart].currentQuestionIndex;
+            const answerData = quizState[currentPart].userAnswers[currentQuestionIndex];
+            if (!answerData) return;
+
+            if (answerData.isCorrect) {
+                quizState[currentPart].score--;
+            }
+            quizState[currentPart].userAnswers[currentQuestionIndex] = undefined;
+            
+            updateScoreText();
+            showQuestion();
+        }
+
+        function redoPart() {
+            quizState[currentPart] = { userAnswers: [], score: 0, currentQuestionIndex: 0 };
+            loadQuizView();
+        }
+
+        // --- EDIT MODE FUNCTIONS ---
+        
+        function toggleEditMode() {
+            quizView.classList.toggle('hidden');
+            editView.classList.toggle('hidden');
+            practiceSheetView.classList.add('hidden');
+            allQuestionsView.classList.add('hidden');
+            if (!editView.classList.contains('hidden')) {
+                renderEditView();
+            }
+            exportArea.classList.add('hidden');
+        }
+
+        function renderEditView() {
+            editQuestionsContainer.innerHTML = '';
+            editQuestionNavArea.innerHTML = '';
+            quizData.forEach((q, index) => {
+                const navButton = document.createElement('button');
+                navButton.textContent = index + 1;
+                navButton.className = 'question-nav-btn border-2 border-gray-300 rounded-md';
+                navButton.addEventListener('click', () => document.getElementById(`edit-q-${index}`).scrollIntoView({ behavior: 'smooth' }));
+                editQuestionNavArea.appendChild(navButton);
+                
+                const qDiv = document.createElement('div');
+                qDiv.id = `edit-q-${index}`;
+                qDiv.className = 'border p-4 rounded-lg mb-4 bg-gray-50 scroll-mt-4';
+                
+                let qBodyHTML = '';
+
+                if (q.type === 'mcq') {
+                    const correctAnserIndex = q.options.en.map(o => o.trim()).indexOf(q.answer.en.trim());
+                    qBodyHTML = `
+                        <label class="edit-label">Question (English)</label>
+                        <textarea class="edit-input question-en">${q.question.en}</textarea>
+                        <div class="options-container mt-4">
+                        ${q.options.en.map((optEn, optIndex) => `
+                            <div class="flex items-center gap-2 mb-2">
+                                <input type="radio" name="correct-answer-${index}" ${optIndex === correctAnserIndex ? 'checked' : ''}>
+                                <input type="text" class="edit-input option-en" value="${optEn}">
+                            </div>
+                        `).join('')}
+                        </div>
+                    `;
+                } else {
+                     qBodyHTML = `<p class="mt-4 p-4 bg-yellow-100 text-yellow-800 rounded-md">This question type (${q.type}) cannot be edited with this tool yet.</p>`;
+                }
+                
+                qDiv.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <p class="font-bold text-lg">Question ${index + 1} (${q.type})</p>
+                        <button class="delete-question-btn bg-red-500 text-white font-bold py-1 px-3 rounded hover:bg-red-600" data-index="${index}">Delete</button>
+                    </div>
+                    ${qBodyHTML}
+                `;
+                editQuestionsContainer.appendChild(qDiv);
+            });
+
+            document.querySelectorAll('.delete-question-btn').forEach(btn => btn.addEventListener('click', (e) => {
+                quizData.splice(parseInt(e.target.dataset.index, 10), 1);
+                renderEditView();
+            }));
+        }
+
+        function getEditedData() {
+            const newQuizData = [];
+            quizData.forEach((originalQ, index) => {
+                const form = document.getElementById(`edit-q-${index}`);
+                if (originalQ.type !== 'mcq') {
+                    newQuizData.push(originalQ);
+                    return;
+                }
+                const q = { number: index + 1, type: 'mcq', question: { en: form.querySelector('.question-en').value } };
+                const optInputs = Array.from(form.querySelectorAll('.option-en'));
+                const radios = Array.from(form.querySelectorAll('input[type="radio"]'));
+                q.options = { en: optInputs.map(input => input.value) };
+                q.answer = { en: q.options.en[radios.findIndex(r => r.checked)] };
+                newQuizData.push(q);
+            });
+            return newQuizData;
+        }
+
+        function applyToPreview() {
+            const editedData = getEditedData();
+            if (currentPart === 1) quizDataPart1 = editedData;
+            else if (currentPart === 2) quizDataPart2 = editedData;
+            else quizDataPart3 = editedData;
+            quizData = editedData;
+            toggleEditMode();
+            initializeQuiz();
+        }
+
+        function generateSaveCode() {
+            const data = getEditedData();
+            const varName = `quizDataPart${currentPart}`;
+            exportOutput.value = `const ${varName} = ${JSON.stringify(data, null, 4)};`;
+            exportArea.classList.remove('hidden');
+        }
+
+        // Event Listeners
+        part1Btn.addEventListener('click', () => switchPart(1));
+        part2Btn.addEventListener('click', () => switchPart(2));
+        part3Btn.addEventListener('click', () => switchPart(3));
+        practiceSheetBtn.addEventListener('click', togglePracticeSheetView);
+        showAllBtn.addEventListener('click', toggleAllQuestionsView);
+        
+        prevBtn.addEventListener('click', () => {
+            if (quizState[currentPart].currentQuestionIndex > 0) {
+                quizState[currentPart].currentQuestionIndex--;
+                showQuestion();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            const allAnswered = quizState[currentPart].userAnswers.filter(Boolean).length === quizData.length;
+            if (quizState[currentPart].currentQuestionIndex < quizData.length - 1 && !allAnswered) {
+                quizState[currentPart].currentQuestionIndex++;
+                showQuestion();
+            } else {
+                showResults();
+            }
+        });
+        
+        restartBtn.addEventListener('click', startQuiz);
+        redoBtn.addEventListener('click', redoQuestion);
+        redoPartBtn.addEventListener('click', redoPart);
+        editQuizBtn.addEventListener('click', toggleEditMode);
+        applyPreviewBtn.addEventListener('click', applyToPreview);
+        generateSaveCodeBtn.addEventListener('click', generateSaveCode);
+        cancelEditBtn.addEventListener('click', toggleEditMode);
+        addQuestionBtn.addEventListener('click', () => {
+            quizData.push({ number: quizData.length + 1, type: 'mcq', question: { en: "New Question" }, options: { en: ["A", "B", "C", "D"] }, answer: { en: "A" } });
+            renderEditView();
+        });
+        exportOutput.addEventListener('click', () => {
+            exportOutput.select();
+            document.execCommand('copy');
+            copyFeedbackEl.textContent = 'Code copied!';
+            setTimeout(() => { copyFeedbackEl.textContent = '' }, 2000);
+        });
+
+        window.addEventListener('beforeunload', e => {
+            e.preventDefault();
+            e.returnValue = '';
+        });
+
+        // Initial start
+        initializeQuiz();
+    </script>
+</body>
+</html>
+
+
+
